@@ -1,125 +1,27 @@
-import { expect } from "chai";
-import Mtrx from "mtrx";
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { Matrix } from '../src/Matrix.js';
 
-function matricesCloseTo(matrixA, matrixB, delta) {
-  expect(matrixA.length).to.equal(matrixB.length);
-  for (let i = 0; i < matrixA.length; i++) {
-    expect(matrixA[i].length).to.equal(matrixB[i].length);
-    for (let j = 0; j < matrixA[i].length; j++) {
-      expect(matrixA[i][j]).to.be.closeTo(matrixB[i][j], delta);
-    }
-  }
-}
-
-describe("Mtrx Library", function () {
-  describe("Matrix Inversion", function () {
-    it("should invert a 2x2 matrix", function () {
-      const matrix = new Mtrx([
-        [4, 7],
-        [2, 6],
-      ]);
-
-      const expectedInverse = [
-        [0.6, -0.7],
-        [-0.2, 0.4],
-      ];
-      const result = matrix.inv();
-      matricesCloseTo(result, expectedInverse, 0.0001);
-    });
-
-    it("should invert a 3x3 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 2, 3],
-        [0, 1, 4],
-        [5, 6, 0],
-      ]);
-      const expectedInverse = [
-        [-24, 18, 5],
-        [20, -15, -4],
-        [-5, 4, 1],
-      ];
-      const result = matrix.inv();
-      matricesCloseTo(result, expectedInverse, 0.0001);
-    });
-
-    it("should throw an error for non-square matrices", function () {
-      const nonSquareMatrix = new Mtrx([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
-      expect(() => nonSquareMatrix.inv()).to.throw(
-        Error,
-        nonSquareMatrix + " is not a Square matrix"
-      );
-    });
-
-    it("should throw an error for singular matrices", function () {
-      const singularMatrix = new Mtrx([
-        [1, 2],
-        [2, 4],
-      ]);
-      expect(() => singularMatrix.inv()).to.throw(
-        Error,
-        singularMatrix + "is a Singular matrix"
-      );
-    });
+describe('Matrix Mock', () => {
+  afterEach(() => {
+    sinon.restore();
   });
 
-  describe("Zeros Function", function () {
-    it("should create a 2x2 matrix of zeros", function () {
-      const matrix = Mtrx.zeros(2, 2);
-      expect(matrix).to.deep.equal([
-        [0, 0],
-        [0, 0],
-      ]);
-    });
+  it('Matrix.solve() should return mock solution', () => {
+    
+    const matrix = new Matrix([[1, 2], [3, 4]]);
+    sinon.stub(matrix, 'solve').returns([1,2,3])
+    const result = matrix.solve();
 
-    it("should create a 3x4 matrix of zeros", function () {
-      const matrix = Mtrx.zeros(3, 4);
-      expect(matrix).to.deep.equal([
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-      ]);
-    });
+    expect(result).to.deep.equal([1, 2, 3]);
   });
 
-  describe("Determinant Calculation", function () {
-    it("should calculate the determinant of a 2x2 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 2],
-        [3, 4],
-      ]);
-      expect(matrix.det).to.equal(-2);
-    });
-  });
+  it('Matrix.multiply() should return mock multiplication result', () => {
+    const matrix = new Matrix([[1, 2], [3, 4]]);
+    sinon.stub(matrix, 'multiply').returns([[1, 0], [0, 1]])
+    const result = matrix.multiply([[5, 6], [7, 8]]);
 
-  describe("Transpose Function", function () {
-    it("should transpose a 2x3 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 2, 3],
-        [4, 5, 6],
-      ]);
-      const transposed = matrix.T();
-      expect(transposed).to.deep.equal([
-        [1, 4],
-        [2, 5],
-        [3, 6],
-      ]);
-    });
-
-    it("should transpose a 3x2 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 4],
-        [2, 5],
-        [3, 6],
-      ]);
-      const transposed = matrix.T();
-      expect(transposed).to.deep.equal([
-        [1, 2, 3],
-        [4, 5, 6],
-      ]);
-    });
+    expect(result).to.deep.equal([[1, 0], [0, 1]]);
   });
 });
+

@@ -12,7 +12,6 @@
   "description": "",
   "dependencies": {
     "chai": "^5.1.2",
-    "mocha": "^10.7.3",
-    "mtrx": "^0.1.6"
+    "mocha": "^10.7.3"
   }
 }

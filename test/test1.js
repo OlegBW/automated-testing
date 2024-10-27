@@ -1,125 +1,62 @@
-import { expect } from "chai";
-import Mtrx from "mtrx";
+import { Builder, By, until } from 'selenium-webdriver';
+import firefox from 'selenium-webdriver/firefox.js'
+import { create, all } from 'mathjs';
 
-function matricesCloseTo(matrixA, matrixB, delta) {
-  expect(matrixA.length).to.equal(matrixB.length);
-  for (let i = 0; i < matrixA.length; i++) {
-    expect(matrixA[i].length).to.equal(matrixB[i].length);
-    for (let j = 0; j < matrixA[i].length; j++) {
-      expect(matrixA[i][j]).to.be.closeTo(matrixB[i][j], delta);
-    }
-  }
+const math = create(all);
+const url = "http://suninjuly.github.io/math.html";
+
+function calc(x) {
+    return math.log(math.abs(12 * math.sin(x))).toString();
 }
 
-describe("Mtrx Library", function () {
-  describe("Matrix Inversion", function () {
-    it("should invert a 2x2 matrix", function () {
-      const matrix = new Mtrx([
-        [4, 7],
-        [2, 6],
-      ]);
+(async function testMathPage() {
+    const firefoxOptions = new firefox.Options()
+        .addArguments('--no-sandbox')
+        .addArguments('--disable-gpu')
+        .addArguments('--disable-dev-shm-usage')
 
-      const expectedInverse = [
-        [0.6, -0.7],
-        [-0.2, 0.4],
-      ];
-      const result = matrix.inv();
-      matricesCloseTo(result, expectedInverse, 0.0001);
-    });
+    let driver = await new Builder()
+        .forBrowser('firefox')
+        .setFirefoxOptions(firefoxOptions)
+        .build();
 
-    it("should invert a 3x3 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 2, 3],
-        [0, 1, 4],
-        [5, 6, 0],
-      ]);
-      const expectedInverse = [
-        [-24, 18, 5],
-        [20, -15, -4],
-        [-5, 4, 1],
-      ];
-      const result = matrix.inv();
-      matricesCloseTo(result, expectedInverse, 0.0001);
-    });
+    try {
+        console.log("Navigating to the page...");
+        await driver.get(url);
 
-    it("should throw an error for non-square matrices", function () {
-      const nonSquareMatrix = new Mtrx([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]);
-      expect(() => nonSquareMatrix.inv()).to.throw(
-        Error,
-        nonSquareMatrix + " is not a Square matrix"
-      );
-    });
+        console.log("Waiting for the input value element to load...");
+        await driver.wait(until.elementLocated(By.id("input_value")), 10000);
 
-    it("should throw an error for singular matrices", function () {
-      const singularMatrix = new Mtrx([
-        [1, 2],
-        [2, 4],
-      ]);
-      expect(() => singularMatrix.inv()).to.throw(
-        Error,
-        singularMatrix + "is a Singular matrix"
-      );
-    });
-  });
+        console.log("Getting the value of x...");
+        let xElement = await driver.findElement(By.id("input_value"));
+        let x = await xElement.getText();
+        console.log(`Value of x: ${x}`);
+        
+        let result = calc(Number(x));
+        console.log(`Calculated result: ${result}`);
 
-  describe("Zeros Function", function () {
-    it("should create a 2x2 matrix of zeros", function () {
-      const matrix = Mtrx.zeros(2, 2);
-      expect(matrix).to.deep.equal([
-        [0, 0],
-        [0, 0],
-      ]);
-    });
+        console.log("Entering answer...");
+        let answerInput = await driver.findElement(By.id("answer"));
+        await answerInput.sendKeys(result);
 
-    it("should create a 3x4 matrix of zeros", function () {
-      const matrix = Mtrx.zeros(3, 4);
-      expect(matrix).to.deep.equal([
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-      ]);
-    });
-  });
+        console.log("Clicking checkbox...");
+        let checkbox = await driver.findElement(By.id("robotCheckbox"));
+        await checkbox.click();
 
-  describe("Determinant Calculation", function () {
-    it("should calculate the determinant of a 2x2 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 2],
-        [3, 4],
-      ]);
-      expect(matrix.det).to.equal(-2);
-    });
-  });
+        console.log("Clicking radiobutton...");
+        let radiobutton = await driver.findElement(By.id("robotsRule"));
+        await radiobutton.click();
 
-  describe("Transpose Function", function () {
-    it("should transpose a 2x3 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 2, 3],
-        [4, 5, 6],
-      ]);
-      const transposed = matrix.T();
-      expect(transposed).to.deep.equal([
-        [1, 4],
-        [2, 5],
-        [3, 6],
-      ]);
-    });
+        console.log("Clicking submit button...");
+        let submitButton = await driver.findElement(By.css("button.btn"));
+        await submitButton.click();
 
-    it("should transpose a 3x2 matrix", function () {
-      const matrix = new Mtrx([
-        [1, 4],
-        [2, 5],
-        [3, 6],
-      ]);
-      const transposed = matrix.T();
-      expect(transposed).to.deep.equal([
-        [1, 2, 3],
-        [4, 5, 6],
-      ]);
-    });
-  });
-});
+        console.log("Submission complete.");
+    } catch (error) {
+        console.error("An error occurred:", error);
+    } finally {
+        console.log("Sleeping for 10 seconds before quitting...");
+        await driver.sleep(10000);
+        await driver.quit();
+    }
+})();

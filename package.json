@@ -11,8 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "chai": "^5.1.2",
-    "mocha": "^10.7.3",
-    "mtrx": "^0.1.6"
+    "mathjs": "^13.2.0",
+    "selenium-webdriver": "^4.25.0"
   }
 }

@@ -1,4 +1,4 @@
-describe("GoRest API User CRUD Operations", () => {
+describe("GoRest Users API /public/v2/users", () => {
   const apiUrl = "https://gorest.co.in/public/v2/users";
   const accessToken = "e99f731a1bda6c827f4508cd70c9a4b88b83429d8494d22a1dd33b4ab3f1eacf";
   let userId;
